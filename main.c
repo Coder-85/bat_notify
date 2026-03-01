@@ -3,9 +3,11 @@
 #include <string.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
+#include <sys/signalfd.h>
 #include <linux/netlink.h>
 #include <libnotify/notify.h>
 
@@ -319,6 +321,17 @@ int main(void)
     int nl_sock = open_uevent_socket();
     int timer_fd = open_timer_fd();
 
+    sigset_t mask;
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGTERM);
+    sigprocmask(SIG_BLOCK, &mask, NULL);
+    int sig_fd = signalfd(-1, &mask, 0);
+    if (sig_fd < 0)
+    {
+        perror("signalfd");
+        exit(EXIT_FAILURE);
+    }
+
     int ep = epoll_create1(0);
     if (ep < 0)
     {
@@ -341,8 +354,17 @@ int main(void)
         exit(EXIT_FAILURE);
     }
 
+    ev.events = EPOLLIN, ev.data.fd = sig_fd;
+    if (epoll_ctl(ep, EPOLL_CTL_ADD, sig_fd, &ev) < 0)
+    {
+        perror("epoll_ctl");
+        exit(EXIT_FAILURE);
+    }
+
     struct epoll_event events[8];
-    while (1)
+
+    int running = 1;
+    while (running)
     {
         int n = epoll_wait(ep, events, 8, -1);
         if (n < 0)
@@ -357,10 +379,13 @@ int main(void)
                 handle_netlink_event(nl_sock, &previous);
             else if (events[i].data.fd == timer_fd)
                 handle_timer_event(timer_fd, &previous);
+            else if (events[i].data.fd == sig_fd)
+                running = 0;
         }
     }
 
     close(ep);
+    close(sig_fd);
     close(timer_fd);
     close(nl_sock);
     notify_uninit();
