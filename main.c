@@ -311,6 +311,8 @@ void handle_timer_event(int timer_fd, power_state_t *previous)
 #ifndef UNIT_TEST
 int main(void)
 {
+    setvbuf(stdout, NULL, _IONBF, 0);
+
     printf("Started\n");
     printf("Querying power devices...\n");
     detect_power_devices();
