@@ -4,7 +4,7 @@ LIBS = $(shell pkg-config --libs libnotify)
 PREFIX = /usr/local
 SYSTEMD_DIR = /usr/lib/systemd/user
 
-.PHONY: all test install uninstall clean
+.PHONY: all test install uninstall uninstall-user clean
 
 all: bat_notify
 
@@ -24,11 +24,13 @@ install: bat_notify
 	install -Dm644 bat_notify.service $(DESTDIR)$(SYSTEMD_DIR)/bat_notify.service
 	@echo "Run 'systemctl --user daemon-reload' then 'systemctl --user enable --now bat_notify' to start the service."
 
-uninstall:
+uninstall-user:
 	systemctl --user disable --now bat_notify || true
+	systemctl --user daemon-reload || true
+
+uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/bat_notify
 	rm -f $(DESTDIR)$(SYSTEMD_DIR)/bat_notify.service
-	systemctl --user daemon-reload || true
 
 clean:
 	rm -f bat_notify test/test_bin

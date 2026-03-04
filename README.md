@@ -60,8 +60,16 @@ systemctl --user enable --now bat_notify
 
 ## Uninstalling
 
+Uninstalling is a two-step process due to mixed privilege requirements.
+
+At first, stop and disable the per-user service instance.
+
+```sh
+make uninstall-user
+```
+
+Then remove the binary and unit file from system directories. This requires root previlege.
+
 ```sh
 sudo make uninstall
 ```
-
-This stops and disables the service, removes the binary and unit file, and reloads systemd.
