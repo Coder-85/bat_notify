@@ -15,8 +15,9 @@
 #define CHANGE_NONE           0
 #define CHANGE_ONLINE         1
 #define BATTERY_POLL_INTERVAL 60  // seconds
-
+#ifndef SYSFS_PATH // Guard for test
 #define SYSFS_PATH "/sys/class/power_supply"
+#endif
 #define UEVENT_BUFFER_SIZE 4096
 
 typedef struct {
@@ -237,12 +238,14 @@ const char *ac_icon(int online)
     return online == 1 ? "ac-adapter" : "battery";
 }
 
+#ifndef UNIT_TEST
 void send_notification(const char *summary, const char *body, const char *icon)
 {
     NotifyNotification *n = notify_notification_new(summary, body, icon);
     notify_notification_show(n, NULL);
     g_object_unref(G_OBJECT(n));
 }
+#endif
 
 void handle_netlink_event(int nl_sock, power_state_t *previous)
 {
@@ -305,6 +308,7 @@ void handle_timer_event(int timer_fd, power_state_t *previous)
     previous->capacity = current.capacity;
 }
 
+#ifndef UNIT_TEST
 int main(void)
 {
     printf("Started\n");
@@ -394,3 +398,4 @@ int main(void)
 
     return 0;
 }
+#endif
