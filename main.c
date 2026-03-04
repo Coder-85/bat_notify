@@ -268,7 +268,7 @@ void handle_netlink_event(int nl_sock, power_state_t *previous)
     *previous = current;
 
     if (changed & CHANGE_ONLINE)
-        send_notification("Power Adapter", current.online == 1 ? "Charging" : "Disconnected", ac_icon(current.online));
+        send_notification("Power Adapter", current.online == 1 ? "Plugged in" : "Disconnected", ac_icon(current.online));
 }
 
 int open_timer_fd(void)
