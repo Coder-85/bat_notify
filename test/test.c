@@ -168,7 +168,7 @@ void test_uevent_plug_in(void)
 
     ASSERT(notif_count == 1, "uevent plug-in: one notification");
     ASSERT(strcmp(last_summary, "Power Adapter") == 0, "uevent plug-in: correct summary");
-    ASSERT(strcmp(last_body, "Charging") == 0, "uevent plug-in: correct body");
+    ASSERT(strcmp(last_body, "Plugged in") == 0, "uevent plug-in: correct body");
 
     close(sv[0]); close(sv[1]);
 }
