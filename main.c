@@ -265,10 +265,12 @@ void handle_netlink_event(int nl_sock, power_state_t *previous)
     read_state(&current);
 
     int changed = state_changed(previous, &current);
-    *previous = current;
 
     if (changed & CHANGE_ONLINE)
+    {
         send_notification("Power Adapter", current.online == 1 ? "Plugged in" : "Disconnected", ac_icon(current.online));
+        previous->online = current.online;
+    }
 }
 
 int open_timer_fd(void)
