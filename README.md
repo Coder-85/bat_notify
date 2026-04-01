@@ -9,9 +9,13 @@ A lightweight battery notification daemon for Linux. It sends desktop notificati
 
 ## Dependencies
 ```
-libnotify pkg-config
+notify-send
 ```
 A running notification daemon is also required for displaying notifications.
+
+`notify-send` is typically included in the `libnotify` package:
+- **Debian/Ubuntu:** `sudo apt install libnotify-bin`
+- **Arch Linux:** `sudo pacman -S libnotify`
 
 ---
 

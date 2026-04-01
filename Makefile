@@ -1,6 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra $(shell pkg-config --cflags libnotify)
-LIBS = $(shell pkg-config --libs libnotify)
+CFLAGS = -Wall -Wextra
 PREFIX = /usr/local
 SYSTEMD_DIR = /usr/lib/systemd/user
 
@@ -9,7 +8,7 @@ SYSTEMD_DIR = /usr/lib/systemd/user
 all: bat_notify
 
 bat_notify: main.c
-	$(CC) $(CFLAGS) -o $@ $< $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $<
 
 test: test/test_bin
 	chmod +x test/setup_fake_sysfs.sh
@@ -17,7 +16,7 @@ test: test/test_bin
 	test/test_bin; ret=$$?; test/setup_fake_sysfs.sh teardown; exit $$ret
 
 test/test_bin: test/test.c main.c
-	$(CC) $(CFLAGS) -DUNIT_TEST -DSYSFS_PATH=\"/tmp/test_ps\" -o $@ test/test.c $(LIBS)
+	$(CC) $(CFLAGS) -DUNIT_TEST -DSYSFS_PATH=\"/tmp/test_ps\" -o $@ test/test.c
 
 install: bat_notify
 	install -Dm755 bat_notify $(DESTDIR)$(PREFIX)/bin/bat_notify

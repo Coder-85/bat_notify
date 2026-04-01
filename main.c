@@ -8,8 +8,8 @@
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
 #include <sys/signalfd.h>
+#include <sys/wait.h>
 #include <linux/netlink.h>
-#include <libnotify/notify.h>
 
 #define MAX_AC_DEVICES        16
 #define CHANGE_NONE           0
@@ -241,9 +241,16 @@ const char *ac_icon(int online)
 #ifndef UNIT_TEST
 void send_notification(const char *summary, const char *body, const char *icon)
 {
-    NotifyNotification *n = notify_notification_new(summary, body, icon);
-    notify_notification_show(n, NULL);
-    g_object_unref(G_OBJECT(n));
+    pid_t pid = fork();
+    if (pid == 0)
+    {
+        execlp("notify-send", "notify-send", "-i", icon, summary, body, NULL);
+        _exit(1);
+    }
+    else if (pid > 0)
+    {
+        waitpid(pid, NULL, 0);
+    }
 }
 #endif
 
@@ -318,8 +325,6 @@ int main(void)
     printf("Started\n");
     printf("Querying power devices...\n");
     detect_power_devices();
-
-    notify_init("bat_notify");
 
     power_state_t previous;
     read_state(&previous);
@@ -396,7 +401,6 @@ int main(void)
     close(sig_fd);
     close(timer_fd);
     close(nl_sock);
-    notify_uninit();
 
     printf("Closing\n");
 
